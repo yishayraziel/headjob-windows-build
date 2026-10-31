@@ -53,3 +53,9 @@ The supplied photographic panel is embedded as the interface background. Knobs n
 The small footer knob provides manual Output Gain from -24 to +12 dB (25 ms ramp). Double-click resets to 0 dB. Auto Gain defaults off. It compares stereo-linked input and processed-output mean-square power with a 400 ms exponential window, then smoothly adjusts attenuation over approximately 250 ms. It never boosts; attenuation is limited to 24 dB. Below approximately -100 dBFS input power it holds the correction to avoid chasing silence. It requires settling time and is RMS matching, not LUFS or guaranteed perceptual loudness equality. It cannot raise processed signals that are quieter than the input.
 
 Manual gain is applied AFTER automatic correction, so use 0 dB for level-matched comparisons. Both controls are smoothed, automatable and saved in DAW state. Metering follows both controls. Host bypass crossfades back to the latency-aligned dry signal, bypassing manual and automatic gain. These controls do not provide limiting.
+
+## Windows x64
+
+Run `scripts/build-windows.ps1` in PowerShell 7 with Visual Studio 2022 C++ desktop tools, CMake, Git and Inno Setup 6 installed. It builds VST3 and Standalone, runs internal DSP/UI tests, renders a preview and creates the installer. MSVC runtime is linked statically. The installer targets Windows 10/11 x64 and places the plug-in in `C:\Program Files\Common Files\VST3\HEADJOB.vst3`. The standalone executable is supplied separately. Run `scripts/validate-windows.ps1` only in a disposable Windows environment: it installs, validates using pluginval 1.0.4 strictness 5 and uninstalls the plug-in. The macOS-only AU smoke test is not used on Windows.
+
+This Windows release has no Authenticode signature; Apple Developer ID certificates cannot sign Windows installers.

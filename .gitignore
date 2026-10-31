@@ -2,3 +2,4 @@ build*/
 dist/
 outputs/
 validation-tools/
+.DS_Store
