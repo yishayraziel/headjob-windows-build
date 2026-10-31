@@ -1,0 +1,34 @@
+name: HEADJOB Windows x64
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build plugin, tests, preview and installer
+        shell: pwsh
+        run: ./scripts/build-windows.ps1
+      - name: Install, validate VST3 and uninstall
+        shell: pwsh
+        run: ./scripts/validate-windows.ps1
+      - name: Upload validated Windows binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: HEADJOB-0.3.0-Windows-x64
+          if-no-files-found: error
+          path: |
+            dist/*.exe
+            build-windows/HEADJOB_artefacts/Release/VST3/HEADJOB.vst3/**
+            build-windows/HEADJOB_artefacts/Release/Standalone/HEADJOB.exe
+      - name: Upload validation and UI preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: HEADJOB-Windows-validation
+          path: outputs/**
