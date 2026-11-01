@@ -8,7 +8,7 @@ int main(int argc,char** argv){
  {
   for(bool automatic:{false,true}){Engine e;e.prepare(48000,256);juce::AudioBuffer<double>b(2,256);double input=0,output=0,stereoError=0;
    for(int block=0;block<1600;++block){for(int i=0;i<256;++i){double x=0.03*std::sin(2*juce::MathConstants<double>::pi*1000*(block*256+i)/48000);b.setSample(0,i,x);b.setSample(1,i,x);}e.process(b,{10,0,0},false,0,automatic);if(block>1400)for(int i=0;i<256;++i){input+=0.03*0.03*0.5;output+=b.getSample(0,i)*b.getSample(0,i);stereoError=std::max(stereoError,std::abs(b.getSample(0,i)-b.getSample(1,i)));}}
-   double db=10*std::log10(output/input);std::cout<<"Auto Gain="<<automatic<<" steady RMS delta dB="<<db<<" stereo error="<<stereoError<<"\n";if(stereoError>1e-12 || (automatic && std::abs(db)>0.15) || (!automatic && db<1))return 12;
+   double db=10*std::log10(output/input);std::cout<<"Auto Gain="<<automatic<<" steady RMS delta dB="<<db<<" stereo error="<<stereoError<<"\n";if(stereoError>1e-12 || (automatic && std::abs(db)>0.15) || (!automatic && db<0.1))return 12;
   }
   Engine e;e.prepare(48000,256);juce::AudioBuffer<double>b(2,256);double energy=0;for(int k=0;k<100;++k){for(int c=0;c<2;++c)for(int i=0;i<256;++i)b.setSample(c,i,0.1);e.process(b,{0,0,0},false,6,false);if(k==99)energy=b.getSample(0,255);}if(std::abs(energy-0.1*std::pow(10.0,6.0/20))>1e-10)return 13;
   for(int k=0;k<100;++k){for(int c=0;c<2;++c)for(int i=0;i<256;++i)b.setSample(c,i,0.1);e.process(b,{0,0,0},true,12,true);}if(std::abs(b.getSample(0,255)-0.1)>1e-10)return 14;

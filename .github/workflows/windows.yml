@@ -1,7 +1,7 @@
-name: HEADJOB Windows x64
+name: HEADJOB Refined Windows x64
 on:
   push:
-    branches: [main]
+    branches: [main, refined-preview]
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,15 +20,15 @@ jobs:
       - name: Upload validated Windows binaries
         uses: actions/upload-artifact@v4
         with:
-          name: HEADJOB-0.3.0-Windows-x64
+          name: HEADJOB-Refined-0.4-Windows-x64
           if-no-files-found: error
           path: |
             dist/*.exe
-            build-windows/HEADJOB_artefacts/Release/VST3/HEADJOB.vst3/**
-            build-windows/HEADJOB_artefacts/Release/Standalone/HEADJOB.exe
+            build-windows/HEADJOB_artefacts/Release/VST3/HEADJOB Refined.vst3/**
+            build-windows/HEADJOB_artefacts/Release/Standalone/HEADJOB Refined.exe
       - name: Upload validation and UI preview
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: HEADJOB-Windows-validation
+          name: HEADJOB-Refined-Windows-validation
           path: outputs/**

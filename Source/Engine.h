@@ -24,20 +24,29 @@ public:
   for(int k=0;k<3;++k) amount[k].setTargetValue(juce::jlimit(0.0,1.0,knobs[k]/10.0));
   auto up=os->processSamplesUp(juce::dsp::AudioBlock<double>(b));
   for(size_t i=0;i<up.getNumSamples();++i) {
-   double t=amount[0].getNextValue(),p=amount[1].getNextValue(),a=amount[2].getNextValue();
+   // More usable low/mid travel and a restrained parallel nonlinear residual.
+   const double t=std::pow(amount[0].getNextValue(),1.5);
+   const double p=std::pow(amount[1].getNextValue(),1.5);
+   const double a=std::pow(amount[2].getNextValue(),1.5);
    for(int c=0;c<2;++c) {
-    double x=up.getSample(c,(int)i), d=1+2*t*t, bias=0.55;
-    double tri=(std::tanh(d*x+bias)-std::tanh(bias))/(d*(1-std::pow(std::tanh(bias),2)));
-    x+=t*(tri-x);
-    d=1+4*p*p; x+=p*(std::tanh(d*x)/d-x);
-    low[c]+=alpha*(x-low[c]); double pre=x+1.8*(x-low[c]);
-    d=1+3.5*a*a; double sat=std::tanh(d*pre)/d;
-    // Exact inverse of pre-emphasis in the linear limit.
-    double out=(sat+1.8*(1-alpha)*de[c])/(1+1.8*(1-alpha)); de[c]=out;
-    x+=a*(out-x);
-    double hp=x-prevX[c]+dcR*prevY[c]; prevX[c]=x;prevY[c]=hp;
-    double active=juce::jlimit(0.0,1.0,(t+p+a)*20.0);
-    up.setSample(c,(int)i,(x+active*(hp-x))*(1+0.42*t+0.65*p+0.65*a));
+    double x=up.getSample(c,(int)i);
+    const double triDrive=0.45+0.75*t,bias=0.50;
+    const double tri=(std::tanh(triDrive*x+bias)-std::tanh(bias))/(triDrive*(1-std::pow(std::tanh(bias),2)));
+    x+=0.22*t*(tri-x);
+    // The untouched component preserves transient slope and crest factor.
+    const double pentDrive=1.50+1.00*p,pentMix=p*(0.25+0.10*p);
+    x+=pentMix*(std::tanh(pentDrive*x)/pentDrive-x);
+    low[c]+=alpha*(x-low[c]);
+    constexpr double emphasis=0.85;
+    const double pre=x+emphasis*(x-low[c]);
+    const double tapeDrive=0.85+1.00*a;
+    const double sat=std::tanh(tapeDrive*pre)/tapeDrive;
+    const double out=(sat+emphasis*(1-alpha)*de[c])/(1+emphasis*(1-alpha));de[c]=out;
+    x+=a*(0.20+0.18*a)*(out-x);
+    const double hp=x-prevX[c]+dcR*prevY[c];prevX[c]=x;prevY[c]=hp;
+    const double active=juce::jlimit(0.0,1.0,(t+p+a)*20.0);
+    // Restrained makeup replaces the previous large amount-dependent boost.
+    up.setSample(c,(int)i,(x+active*(hp-x))*(1+0.03*t+0.02*p+0.02*a));
    }
   }
   auto down=juce::dsp::AudioBlock<double>(b); os->processSamplesDown(down);
