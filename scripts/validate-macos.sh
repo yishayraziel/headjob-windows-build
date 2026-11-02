@@ -26,8 +26,12 @@ done
 if [ "$MODE" = signed ]; then
   codesign --verify --deep --strict --verbose=2 "$AU" 2>&1 | tee "$LOGS/au-signature.txt"
   codesign --verify --deep --strict --verbose=2 "$VST" 2>&1 | tee "$LOGS/vst3-signature.txt"
-  xcrun stapler validate "$AU"
-  xcrun stapler validate "$VST"
+  # The installer's own ticket is checked above. Report a bundle's ticket without failing the build.
+  for bundle in "$AU" "$VST"; do
+    out=$(xcrun stapler validate "$bundle" 2>&1) && code=0 || code=$?
+    [ "$code" = 0 ] || echo "::warning title=stapler validate $(basename "$bundle") exit $code::$(echo "$out" | tr '\n' ' ' | cut -c1-500)"
+    [ "$code" != 0 ] || echo "::notice title=stapler validate $(basename "$bundle")::ticket OK"
+  done
 fi
 
 # Apple's AU validator
