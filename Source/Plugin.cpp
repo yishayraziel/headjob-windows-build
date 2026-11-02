@@ -63,7 +63,11 @@ private:int capacity=512;float decay=0.9999f;
 };
 Panel::Panel(Processor& p):AudioProcessorEditor(p),proc(p){
  panel=juce::ImageCache::getFromMemory(BinaryData::HEADJOBPanel_png,BinaryData::HEADJOBPanel_pngSize);
- setSize(1162,304);setLookAndFeel(this);
+ const int savedWidth=juce::jlimit(813,2324,(int)p.state.state.getProperty("editorWidth",1162));
+ setLookAndFeel(this);
+ setResizable(true,true);setResizeLimits(813,213,2324,608);
+ getConstrainer()->setFixedAspectRatio(1162.0/304.0);
+ setSize(savedWidth,juce::roundToInt(savedWidth*304.0/1162.0));
  const char* ids[]{"triode","pentode","tape"};
  for(int i=0;i<3;++i){auto& s=knobs[i];s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);s.setRotaryParameters(juce::MathConstants<float>::pi*1.25f,juce::MathConstants<float>::pi*2.75f,true);s.setTextBoxStyle(juce::Slider::NoTextBox,false,0,0);s.setName(ids[i]);s.setTitle(juce::String(ids[i]).toUpperCase());s.setDoubleClickReturnValue(true,0);s.setMouseCursor(juce::MouseCursor::UpDownResizeCursor);addAndMakeVisible(s);links[i]=std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.state,ids[i],s);}
  power.setButtonText("Bypass");power.setTitle("Bypass");power.setAlpha(0.0f);power.setMouseCursor(juce::MouseCursor::PointingHandCursor);addAndMakeVisible(power);
@@ -75,8 +79,12 @@ Panel::Panel(Processor& p):AudioProcessorEditor(p),proc(p){
  startTimerHz(30);
 }
 void Panel::resized(){
+ const float scale=getWidth()/1162.0f;
+ for(auto* control:std::initializer_list<juce::Component*>{&knobs[0],&knobs[1],&knobs[2],&power,&outputGain,&autoGainButton})
+  control->setTransform(juce::AffineTransform::scale(scale));
+ proc.state.state.setProperty("editorWidth",getWidth(),nullptr);
  outputGain.setBounds(490,237,140,60);autoGainButton.setBounds(683,253,145,28);
- const auto transform=juce::AffineTransform::translation(-56.0f,-149.0f).scaled(getWidth()/1936.0f,230.0f/382.0f);
+ const auto transform=juce::AffineTransform::translation(-56.0f,-149.0f).scaled(1162.0f/1936.0f,230.0f/382.0f);
  const int centres[]{902,1252,1596};
  for(int i=0;i<3;++i)knobs[i].setBounds(juce::Rectangle<float>((float)centres[i]-83,202,166,166).transformedBy(transform).toNearestInt());
  power.setBounds(juce::Rectangle<float>(568,211,92,201).transformedBy(transform).toNearestInt());
@@ -129,13 +137,15 @@ void Panel::drawRotarySlider(juce::Graphics& g,int x,int y,int w,int h,float v,f
  g.drawImage(knobFrames[index],juce::Rectangle<float>(cx-radius,cy-radius,2*radius,2*radius));
 }
 void Panel::paint(juce::Graphics& g){
+ juce::Graphics::ScopedSaveState panelScale(g);
+ g.addTransform(juce::AffineTransform::scale(getWidth()/1162.0f));
  g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
- g.drawImage(panel,0,0,getWidth(),230,56,149,1936,382);
- for(int xx=0;xx<getWidth();xx+=300)for(int yy=230;yy<304;yy+=55){int ww=juce::jmin(300,getWidth()-xx),hh=juce::jmin(55,304-yy);g.drawImage(panel,xx,yy,ww,hh,260,414,ww,hh);}
- g.setColour(juce::Colour(0xff778b87));g.drawHorizontalLine(231,0,(float)getWidth());
+ g.drawImage(panel,0,0,1162,230,56,149,1936,382);
+ for(int xx=0;xx<1162;xx+=300)for(int yy=230;yy<304;yy+=55){int ww=juce::jmin(300,1162-xx),hh=juce::jmin(55,304-yy);g.drawImage(panel,xx,yy,ww,hh,260,414,ww,hh);}
+ g.setColour(juce::Colour(0xff778b87));g.drawHorizontalLine(231,0,1162.0f);
  g.setColour(juce::Colour(0xff173e3b));g.setFont(juce::FontOptions(14));g.drawText("OUTPUT",411,254,76,22,juce::Justification::centredRight);
  juce::Graphics::ScopedSaveState save(g);
- g.addTransform(juce::AffineTransform::translation(-56.0f,-149.0f).scaled(getWidth()/1936.0f,230.0f/382.0f));
+ g.addTransform(juce::AffineTransform::translation(-56.0f,-149.0f).scaled(1162.0f/1936.0f,230.0f/382.0f));
  const bool off=proc.state.getRawParameterValue("bypass")->load()>0.5f;
  if(off){
   // Dim the photographed power lamp without replacing its polished bezel.
