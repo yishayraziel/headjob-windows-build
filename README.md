@@ -22,7 +22,11 @@ JUCE 8.0.10 and CMake 3.22+. `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release` (o
 
 Test CSV measures H2–H9 for a 997 Hz sine, after settling, over one second at 48 kHz, Auto Gain off, Output 0 dB, one active stage. Levels are peak dBFS. Distortion, RMS gain and crest factor are measured separately. A reduction is not automatically a perceptual improvement. Source and JUCE licensing are described by LICENSE and https://juce.com/legal/juce-8-licence/.
 
-For a Developer ID signed/notarized macOS installer, the binary preview ZIP includes `Create Signed Refined Installer.command`, using the existing local certificate identities and notary Keychain profile HEADJOB. It is syntax checked but was not run end to end in this agent environment. The supplied ZIP remains ad-hoc signed.
+## Signed macOS builds
+
+Every push to `refined-preview` or `main` builds a universal AU and VST3 on a GitHub Mac (`.github/workflows/macos.yml`), runs the tests, signs with Developer ID, notarizes with Apple, then installs the result and runs auval and pluginval strictness 5. Signed builds are published to the `refined-latest` release. Signing needs six repository secrets, set once by running `installer/setup_mac_signing.sh` on the Mac; without them the job still builds, ad-hoc signed. No Mac is needed after that.
+
+Local fallback: for a Developer ID signed/notarized macOS installer, the binary preview ZIP includes `Create Signed Refined Installer.command`, using the existing local certificate identities and notary Keychain profile HEADJOB. It is syntax checked but was not run end to end in this agent environment. The supplied ZIP remains ad-hoc signed.
 
 ## Resizing (0.4.1)
 
