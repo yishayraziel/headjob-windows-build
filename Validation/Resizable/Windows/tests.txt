@@ -1,0 +1,8 @@
+Internal ctest changing into directory: D:/a/headjob-windows-build/headjob-windows-build/build-windows
+Test project D:/a/headjob-windows-build/headjob-windows-build/build-windows
+    Start 1: DSP
+1/1 Test #1: DSP ..............................   Passed    1.08 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   1.14 sec

@@ -1,0 +1,14 @@
+DAW state roundtrip passed
+Photographic UI controls and bypass attachment passed
+Auto Gain=0 steady RMS delta dB=0.256876 stereo error=0
+Auto Gain=1 steady RMS delta dB=-0.00051979 stereo error=0
+Manual gain, host bypass and new parameter state passed
+Resize 70/100/150/200 percent, control bounds and DAW size recall passed
+stage=0 H2=323.846 H3=30.5691
+stage=1 H2=3.01002 H3=296.829
+stage=2 H2=3.2135 H3=366.366
+finite/stable/bypass sr=44100 latency=6 peak=0.508812
+finite/stable/bypass sr=48000 latency=6 peak=0.508744
+finite/stable/bypass sr=96000 latency=6 peak=0.508666
+finite/stable/bypass sr=192000 latency=6 peak=0.508666
+zero controls null error=0

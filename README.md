@@ -1,4 +1,4 @@
-# HEADJOB Refined 0.4 — audition preview
+# HEADJOB Refined 0.4.1 — audition preview
 
 This is an ORIGINAL tentative response to owner feedback, not a hardware-calibrated HEDD emulation. It is a separate plug-in identity (`audio.headjob.refined`, subtype HjR4), so HEADJOB 0.3 sessions and installations remain available for comparison. Both default to zero processing. No previous release file has been replaced.
 
@@ -18,6 +18,12 @@ For hardware comparison, record the exact same source through a digital HEDD pat
 
 ## Build and tests
 
-JUCE 8.0.10 and CMake 3.22+. `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release` (or add `-DJUCE_PATH=/absolute/JUCE`). `cmake --build build --config Release`. `ctest --test-dir build -C Release --output-on-failure`. `HEADJOBCompare` compares this preview to the included 0.3 `LegacyEngine` and emits CSV. It does NOT compare against Crane Song hardware. Windows conditional targets are present, but this preview's Windows binaries have not been built/tested.
+JUCE 8.0.10 and CMake 3.22+. `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release` (or add `-DJUCE_PATH=/absolute/JUCE`). `cmake --build build --config Release`. `ctest --test-dir build -C Release --output-on-failure`. `HEADJOBCompare` compares this preview to the included 0.3 `LegacyEngine` and emits CSV. It does NOT compare against Crane Song hardware. Windows x64 VST3 and Standalone have been built with Visual Studio 2022. Internal tests, silent install/uninstall and pluginval 1.0.4 strictness 5 passed on the Windows Server 2022 runner. No direct Cubase test has been performed. The installer and plug-in have no Windows Authenticode signature. Run scripts/build-windows.ps1 to reproduce; scripts/validate-windows.ps1 is intended for disposable test machines only.
 
 Test CSV measures H2–H9 for a 997 Hz sine, after settling, over one second at 48 kHz, Auto Gain off, Output 0 dB, one active stage. Levels are peak dBFS. Distortion, RMS gain and crest factor are measured separately. A reduction is not automatically a perceptual improvement. Source and JUCE licensing are described by LICENSE and https://juce.com/legal/juce-8-licence/.
+
+For a Developer ID signed/notarized macOS installer, the binary preview ZIP includes `Create Signed Refined Installer.command`, using the existing local certificate identities and notary Keychain profile HEADJOB. It is syntax checked but was not run end to end in this agent environment. The supplied ZIP remains ad-hoc signed.
+
+## Resizing (0.4.1)
+
+Drag the visible lower-right corner. The interface scales uniformly from approximately 70% (813×213) to 200% (2324×608), with a fixed 1162:304 aspect ratio. Knobs, text, meter and mouse targets scale together. Editor width is stored in DAW state and restored on reopening. Existing sessions without this property use 1162×304. This update changes the editor only, retaining the 0.4 DSP.

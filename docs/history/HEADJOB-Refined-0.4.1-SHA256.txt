@@ -1,0 +1,2 @@
+60701d063faf29340cb68363a6d0897d442b9fd82b81290030e65076bbc80056  outputs/HEADJOB-Refined-0.4.1-Windows-x64-Setup.exe
+a9cac73ce1b102a7ab9860f6c0b53046a66ad2bff566800ae7b5c743b63d0342  outputs/HEADJOB-Refined-0.4.1-macOS-Resizable.zip

@@ -1,0 +1,12 @@
+HEADJOB Refined 0.4.1 — 2026-11-02
+
+Editor resizable using lower-right JUCE corner control, fixed aspect 1162:304.
+Limits approximately 70%–200%; scaled hit regions, text, meters and rotary rendering.
+Editor width persisted/restored in DAW state; tests at 813/1162/1743/2324 width passed.
+macOS: universal arm64/x86_64 build, DSP/state/gain/resize tests, 47 Steinberg VST3 checks, direct AU render smoke passed. Actual editor images visually inspected at 70% and 150%.
+Windows x64: Visual Studio 2022 build, same internal suite, install/uninstall, installed pluginval 1.0.4 strictness 5 passed.
+Windows workflow 41456393933; source commit ff1222b in private repository yishayraziel/headjob-windows-build, refined-preview branch.
+
+DSP unchanged from Refined 0.4. No HEDD hardware matching claim.
+Supplied macOS preview bundles are ad-hoc signed, not Developer ID signed/notarized. The included local signing script uses the user's existing Developer ID identities and local HEADJOB notary profile. Automatic Terminal control is unavailable in this agent environment; no new signed/notarized 0.4.1 artifact is claimed.
+Windows binaries have no Authenticode signature. No direct Cubase/Logic testing performed.
