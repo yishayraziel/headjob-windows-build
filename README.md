@@ -1,4 +1,4 @@
-# HEADJOB Refined 0.5.0 — audition preview
+# HEADJOB Refined 0.5.1 — audition preview
 
 This is an ORIGINAL tentative response to owner feedback, not a hardware-calibrated HEDD emulation. It is a separate plug-in identity (`audio.headjob.refined`, subtype HjR4), so HEADJOB 0.3 sessions and installations remain available for comparison. Both default to zero processing. No previous release file has been replaced.
 

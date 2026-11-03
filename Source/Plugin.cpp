@@ -144,6 +144,7 @@ void Panel::paint(juce::Graphics& g){
  for(int xx=0;xx<1162;xx+=300)for(int yy=230;yy<304;yy+=55){int ww=juce::jmin(300,1162-xx),hh=juce::jmin(55,304-yy);g.drawImage(panel,xx,yy,ww,hh,260,414,ww,hh);}
  g.setColour(juce::Colour(0xff778b87));g.drawHorizontalLine(231,0,1162.0f);
  g.setColour(juce::Colour(0xff173e3b));g.setFont(juce::FontOptions(14));g.drawText("OUTPUT",411,254,76,22,juce::Justification::centredRight);
+ g.setColour(juce::Colour(0xff173e3b).withAlpha(0.7f));g.setFont(juce::FontOptions(11));g.drawText("v" HEADJOB_VERSION,127,158,120,14,juce::Justification::centred);
  juce::Graphics::ScopedSaveState save(g);
  g.addTransform(juce::AffineTransform::translation(-56.0f,-149.0f).scaled(1162.0f/1936.0f,230.0f/382.0f));
  const bool off=proc.state.getRawParameterValue("bypass")->load()>0.5f;

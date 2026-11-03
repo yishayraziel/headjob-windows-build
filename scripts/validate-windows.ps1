@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $logs = Join-Path $root 'outputs\windows-validation'
 New-Item -ItemType Directory -Force $logs | Out-Null
-$installer = Join-Path $root 'dist\HEADJOB-Refined-0.5.0-Windows-x64-Setup.exe'
+$installer = Join-Path $root 'dist\HEADJOB-Refined-0.5.1-Windows-x64-Setup.exe'
 $installedBundle = Join-Path $env:CommonProgramFiles 'VST3\HEADJOB Refined.vst3'
 $binary = Join-Path $installedBundle 'Contents\x86_64-win\HEADJOB Refined.vst3'
 if (Test-Path $installedBundle) { throw 'Validation requires a clean disposable Windows machine.' }
