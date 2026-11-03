@@ -25,4 +25,5 @@ jobs:
       - name: Compare
         run: |
           build/HEADJOBNullProbe_artefacts/Release/HEADJOBNullProbe "/Library/Audio/Plug-Ins/VST3/HEADJOB Refined.vst3" "/Library/Audio/Plug-Ins/VST3/HEADJOB.vst3" | tee result.txt
-          while IFS= read -r line; do echo "::notice title=null::$line"; done < result.txt
+          grep -E "desc|WORST| vs " result.txt | while IFS= read -r line; do echo "::notice title=null::$line"; done
+          build/HEADJOBNullProbe_artefacts/Release/HEADJOBNullProbe "/Library/Audio/Plug-Ins/Components/HEADJOB.component" "/Library/Audio/Plug-Ins/Components/HEADJOB Refined.component" | grep -E "desc|WORST" | while IFS= read -r line; do echo "::notice title=null au::$line"; done || true

@@ -17,7 +17,11 @@ static juce::AudioBuffer<float> render(juce::AudioPluginFormatManager& m,const j
 int main(int,char** argv){juce::ScopedJuceInitialiser_GUI gui;juce::AudioPluginFormatManager m;m.addDefaultFormats();
  auto find=[&](juce::String path){juce::OwnedArray<juce::PluginDescription> t;for(auto* f:m.getFormats())if(f->fileMightContainThisPluginType(path)){f->findAllTypesForFile(t,path);if(!t.isEmpty())break;}if(t.isEmpty()){std::cout<<"NOT FOUND "<<path<<"\n";std::exit(3);}return *t[0];};
  auto a=find(argv[1]),b=find(argv[2]);std::cout<<a.name<<" "<<a.version<<" vs "<<b.name<<" "<<b.version<<"\n";
+ for(auto* d:{&a,&b})std::cout<<"desc "<<d->name<<" format "<<d->pluginFormatName<<" isInstrument "<<(int)d->isInstrument<<" category ["<<d->category<<"] in "<<d->numInputChannels<<" out "<<d->numOutputChannels<<"\n";
+ double worst=-1000;
  for(Knobs k:{Knobs{0,0,0},Knobs{5,0,0},Knobs{0,5,0},Knobs{0,0,5},Knobs{7.2f,0,0},Knobs{0,7.2f,0},Knobs{0,0,7.2f},Knobs{5,5,5},Knobs{10,10,10}})for(float level:{-18.f,-6.f}){
   auto x=render(m,a,k,level),y=render(m,b,k,level);double s=0,d=0,sx=0,sy=0;for(int i=0;i<90000;++i){double u=x.getSample(0,i),v=y.getSample(0,i);s+=u*u;d+=(u-v)*(u-v);sx+=u*u;sy+=v*v;}
+  worst=juce::jmax(worst,10*std::log10((d+1e-30)/(s+1e-30)));
   std::cout<<"knobs "<<k[0]<<" "<<k[1]<<" "<<k[2]<<" input "<<level<<": residual "<<10*std::log10((d+1e-30)/(s+1e-30))<<" dB, level difference "<<10*std::log10((sx+1e-30)/(sy+1e-30))<<" dB\n";}
+ std::cout<<"WORST residual over all 18 cases "<<worst<<" dB\n";
  return 0;}
