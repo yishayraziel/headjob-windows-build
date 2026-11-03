@@ -1,0 +1,28 @@
+name: HEADJOB null test
+on:
+  push:
+    branches: [null-test]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build probe
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+          cmake --build build --target HEADJOBNullProbe --parallel 4
+      - name: Install both released versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download latest --repo ${{ github.repository }} --pattern 'HEADJOB-0.6.0-macOS-Installer.pkg' --dir nulltest
+          sudo installer -pkg nulltest/HEADJOB-0.6.0-macOS-Installer.pkg -target /
+          sudo installer -pkg nulltest/old.pkg -target /
+          ls -la /Library/Audio/Plug-Ins/VST3 /Library/Audio/Plug-Ins/Components
+      - name: Compare
+        run: |
+          build/HEADJOBNullProbe_artefacts/Release/HEADJOBNullProbe "/Library/Audio/Plug-Ins/VST3/HEADJOB Refined.vst3" "/Library/Audio/Plug-Ins/VST3/HEADJOB.vst3" | tee result.txt
+          while IFS= read -r line; do echo "::notice title=null::$line"; done < result.txt

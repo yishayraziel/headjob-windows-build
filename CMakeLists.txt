@@ -42,3 +42,8 @@ if(APPLE OR HEADJOB_HOST_PROBE)
  target_compile_definitions(HEADJOBHostProbe PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_PLUGINHOST_VST3=1 JUCE_PLUGINHOST_AU=1)
  target_link_libraries(HEADJOBHostProbe PRIVATE juce::juce_audio_utils)
 endif()
+
+juce_add_console_app(HEADJOBNullProbe PRODUCT_NAME "HEADJOBNullProbe")
+target_sources(HEADJOBNullProbe PRIVATE nulltest/NullProbe.cpp)
+target_compile_definitions(HEADJOBNullProbe PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_PLUGINHOST_VST3=1 JUCE_PLUGINHOST_AU=1)
+target_link_libraries(HEADJOBNullProbe PRIVATE juce::juce_audio_utils)
