@@ -4,7 +4,7 @@
 [Setup]
 AppId={{DC16BE74-B6FB-4C5B-952E-853B5C562F23}
 AppName=HEADJOB Refined
-AppVersion=0.4.1
+AppVersion=0.5.0
 AppPublisher=HEADJOB Audio
 DefaultDirName={commoncf64}\VST3
 DisableDirPage=yes
@@ -14,7 +14,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
 OutputDir=..\..\dist
-OutputBaseFilename=HEADJOB-Refined-0.4.1-Windows-x64-Setup
+OutputBaseFilename=HEADJOB-Refined-0.5.0-Windows-x64-Setup
 UninstallFilesDir={commonpf64}\HEADJOB Refined\Uninstall
 UninstallDisplayName=HEADJOB Refined VST3
 Compression=lzma2

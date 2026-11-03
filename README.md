@@ -1,10 +1,12 @@
-# HEADJOB Refined 0.4.1 — audition preview
+# HEADJOB Refined 0.5.0 — audition preview
 
 This is an ORIGINAL tentative response to owner feedback, not a hardware-calibrated HEDD emulation. It is a separate plug-in identity (`audio.headjob.refined`, subtype HjR4), so HEADJOB 0.3 sessions and installations remain available for comparison. Both default to zero processing. No previous release file has been replaced.
 
-Triode: shallower asymmetric curve, smaller nonlinear contribution and gentler low/middle knob travel. Pentode: predominantly odd harmonic contribution blended into the unmodified signal, retaining at least 65% of the linear component at the maximum setting, instead of driving the entire stage deeply into tanh. Tape: reduced record pre-emphasis (0.85 versus 1.8 HF residual gain), reduced saturation drive, restrained nonlinear contribution and matching inverse de-emphasis. Serial ordering, 4x oversampling, 25 ms control smoothing, stereo output metering, manual output gain and RMS Auto Gain are retained. Amount-dependent makeup is much smaller.
+Triode: shallower asymmetric curve, smaller nonlinear contribution and gentler low/middle knob travel. Pentode (0.5): a flat, memoryless third-harmonic curve. At 14:00 (knob 7.22) a -6 dBFS sine reaches its flat top; past 14:00 that point keeps falling, to -12 dBFS at full. 15% dry signal is kept to preserve the transient edge. Tape (0.5): far less added harmonic content. It acts on level and frequency instead: quiet highs lifted about 1.3 dB at 14:00, loud highs pressed down below unity, and a low-end head bump. Serial ordering, 4x oversampling, 25 ms control smoothing, stereo output metering, manual output gain and RMS Auto Gain are retained.
 
-Important: lower distortion does not demonstrate greater HEDD accuracy. This preview may be too subtle or have the wrong harmonic balance. The Pentode sense of presence and Tape brightness require listening/reference assessment. No unmeasured circuit, hysteresis or proprietary formula is claimed.
+Sessions saved with Refined 0.4 open with the same knob positions but the new Pentode and Tape sound.
+
+Important: measured behaviour does not demonstrate HEDD accuracy. The 14:00 calibration follows owner listening feedback, not a hardware capture. Pentode presence and Tape brightness require listening/reference assessment. No unmeasured circuit, hysteresis or proprietary formula is claimed.
 
 ## Install on macOS
 
@@ -30,4 +32,4 @@ Local fallback: for a Developer ID signed/notarized macOS installer, the binary 
 
 ## Resizing (0.4.1)
 
-Drag the visible lower-right corner. The interface scales uniformly from approximately 70% (813×213) to 200% (2324×608), with a fixed 1162:304 aspect ratio. Knobs, text, meter and mouse targets scale together. Editor width is stored in DAW state and restored on reopening. Existing sessions without this property use 1162×304. This update changes the editor only, retaining the 0.4 DSP.
+Drag the visible lower-right corner. The interface scales uniformly from approximately 70% (813×213) to 200% (2324×608), with a fixed 1162:304 aspect ratio. Knobs, text, meter and mouse targets scale together. Editor width is stored in DAW state and restored on reopening. Existing sessions without this property use 1162×304. 

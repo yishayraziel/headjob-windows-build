@@ -26,6 +26,23 @@ int main(int argc,char** argv){
  double h2=std::hypot(re[2],im[2]),h3=std::hypot(re[3],im[3]);std::cout<<"stage="<<stage<<" H2="<<h2<<" H3="<<h3<<"\n";if(stage==0?h2<h3:h3<h2*10)return 6;
  }
 
+
+ // Sine through one stage: fundamental gain in dB and third harmonic in percent.
+ auto sine=[](int stage,float knob,double db,double hz){Engine e;e.prepare(48000,256);juce::AudioBuffer<double>b(2,256);std::array<float,3>a{};a[stage]=knob;const double amp=std::pow(10.0,db/20),w=2*juce::MathConstants<double>::pi*hz/48000;double re[4]{},im[4]{};double count=0;
+  for(int s=0;s<96000;s+=256){for(int i=0;i<256;++i)for(int c=0;c<2;++c)b.setSample(c,i,amp*std::sin(w*(s+i)));e.process(b,a,false);if(s>=48000)for(int i=0;i<256;++i){double x=b.getSample(0,i);double wn=1-std::cos(2*juce::MathConstants<double>::pi*(s+i-48000)/48000.0);count+=wn;for(int h:{1,3}){re[h]+=wn*x*std::cos(w*h*(s+i));im[h]+=wn*x*std::sin(w*h*(s+i));}}}
+  double f=std::hypot(re[1],im[1]);return std::pair<double,double>{20*std::log10(2*f/count/amp),100*std::hypot(re[3],im[3])/f};};
+ {
+  constexpr float twoOClock=7.22f;
+  auto pent=sine(1,twoOClock,-6,997),tape=sine(2,twoOClock,-6,997),pentNoon=sine(1,5,-6,997);
+  std::cout<<"14:00 at -6 dBFS: Pentode gain "<<pent.first<<" dB H3 "<<pent.second<<"%, Tape gain "<<tape.first<<" dB H3 "<<tape.second<<"%, Pentode 12:00 H3 "<<pentNoon.second<<"%\n";
+  if(pent.second<7||pent.first>-1||pentNoon.second>pent.second/2)return 21;   // saturated by 14:00, not before
+  if(tape.second>pent.second/10)return 22;                                    // Tape is not a second third-harmonic stage
+  auto tapeLow=sine(2,twoOClock,-6,60),tapeHigh=sine(2,twoOClock,-6,8000),tapeQuietHigh=sine(2,twoOClock,-30,8000),pentLow=sine(1,twoOClock,-6,60),pentHigh=sine(1,twoOClock,-6,4000);
+  std::cout<<"Tape 14:00: 60 Hz "<<tapeLow.first<<" dB, 8 kHz loud "<<tapeHigh.first<<" dB, 8 kHz quiet "<<tapeQuietHigh.first<<" dB\n";
+  if(tapeLow.first-tapeHigh.first<1||tapeQuietHigh.first-tapeHigh.first<1||tapeQuietHigh.first<0.3)return 23; // Tape depends on frequency and level
+  if(std::abs(pentLow.first-pentHigh.first)>0.3)return 24;                    // Pentode stays flat
+ }
+
  for(double sr:{44100.,48000.,96000.,192000.}) {
   Engine e;e.prepare(sr,256);juce::AudioBuffer<double>b(2,256);double peak=0;
   for(int block=0;block<300;++block){for(int i=0;i<256;++i){double x=0.5*std::sin(2*juce::MathConstants<double>::pi*997*(block*256+i)/sr);b.setSample(0,i,x);b.setSample(1,i,-x);}e.process(b,{10,10,10},block>150);for(int c=0;c<2;++c)for(int i=0;i<256;++i){double x=b.getSample(c,i);if(!std::isfinite(x))return 1;peak=std::max(peak,std::abs(x));}}

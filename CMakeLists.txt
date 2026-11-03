@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(HEADJOB VERSION 0.4.1)
+project(HEADJOB VERSION 0.5.0)
 set(CMAKE_CXX_STANDARD 17)
 if(MSVC)
  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
