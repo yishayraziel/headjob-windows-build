@@ -36,7 +36,7 @@ public:
   l.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"outputGain",1},"Output Gain",juce::NormalisableRange<float>(-24,12,0.1f),0));
   l.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"autoGain",1},"Auto Gain",false));return l;
  }
- const juce::String getName() const override{return "HEADJOB Refined";}
+ const juce::String getName() const override{return "HEADJOB";}
  bool acceptsMidi()const override{return false;} bool producesMidi()const override{return false;}
  double getTailLengthSeconds()const override{return 0.1;}
  int getNumPrograms()override{return 1;} int getCurrentProgram()override{return 0;}

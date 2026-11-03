@@ -1,4 +1,4 @@
-name: HEADJOB Refined macOS
+name: HEADJOB macOS
 on:
   push:
     branches: [main, refined-preview]
@@ -18,7 +18,7 @@ jobs:
       - name: Configure (universal arm64 + x86_64)
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
       - name: Build
-        run: cmake --build build --config Release --target HEADJOB_AU HEADJOB_VST3 HEADJOBTests --parallel 4
+        run: cmake --build build --config Release --target HEADJOB_AU HEADJOB_VST3 HEADJOBTests HEADJOBHostProbe --parallel 4
       - name: DSP, gain and resize tests
         run: ctest --test-dir build -C Release --output-on-failure
       - name: Sign, notarize and package
@@ -37,22 +37,22 @@ jobs:
       - name: Upload macOS build
         uses: actions/upload-artifact@v4
         with:
-          name: HEADJOB-Refined-${{ steps.version.outputs.version }}-macOS
+          name: HEADJOB-${{ steps.version.outputs.version }}-macOS
           if-no-files-found: error
           path: out/*
       - name: Upload validation logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: HEADJOB-Refined-macOS-validation
+          name: HEADJOB-macOS-validation
           path: outputs/**
       - name: Publish signed build
         if: steps.package.outputs.signed == '1'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: refined-latest
+          tag_name: latest
           target_commitish: ${{ github.sha }}
-          name: HEADJOB Refined ${{ steps.version.outputs.version }} (latest signed Mac build)
+          name: HEADJOB ${{ steps.version.outputs.version }} (latest signed Mac build)
           prerelease: true
           make_latest: false
           body: |

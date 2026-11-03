@@ -1,16 +1,16 @@
-# HEADJOB Refined 0.5.1 — audition preview
+# HEADJOB 0.5.2 — audition preview
 
-This is an ORIGINAL tentative response to owner feedback, not a hardware-calibrated HEDD emulation. It is a separate plug-in identity (`audio.headjob.refined`, subtype HjR4), so HEADJOB 0.3 sessions and installations remain available for comparison. Both default to zero processing. No previous release file has been replaced.
+This is an ORIGINAL tentative response to owner feedback, not a hardware-calibrated HEDD emulation. Since 0.5.2 it uses the original HEADJOB identity (`audio.headjob.plugin`, subtype HdJb) and replaces HEADJOB 0.3. The macOS installer removes the old "HEADJOB Refined" preview bundles. Both default to zero processing. No previous release file has been replaced.
 
 Triode: shallower asymmetric curve, smaller nonlinear contribution and gentler low/middle knob travel. Pentode (0.5): a flat, memoryless third-harmonic curve. At 14:00 (knob 7.22) a -6 dBFS sine reaches its flat top; past 14:00 that point keeps falling, to -12 dBFS at full. 15% dry signal is kept to preserve the transient edge. Tape (0.5): far less added harmonic content. It acts on level and frequency instead: quiet highs lifted about 1.3 dB at 14:00, loud highs pressed down below unity, and a low-end head bump. Serial ordering, 4x oversampling, 25 ms control smoothing, stereo output metering, manual output gain and RMS Auto Gain are retained.
 
-Sessions saved with Refined 0.4 open with the same knob positions but the new Pentode and Tape sound.
+Sessions saved with HEADJOB 0.3 open in this version with the same knob positions. Sessions saved with "HEADJOB Refined" no longer find that plug-in.
 
 Important: measured behaviour does not demonstrate HEDD accuracy. The 14:00 calibration follows owner listening feedback, not a hardware capture. Pentode presence and Tape brightness require listening/reference assessment. No unmeasured circuit, hysteresis or proprietary formula is claimed.
 
 ## Install on macOS
 
-Copy `HEADJOB Refined.component` to `~/Library/Audio/Plug-Ins/Components/`, and `HEADJOB Refined.vst3` to `~/Library/Audio/Plug-Ins/VST3/`. Close and restart the DAW and rescan. Choose **HEADJOB Refined**, keeping HEADJOB 0.3 installed for comparison. Bundles contain arm64 and x86_64; runtime tests were on Apple Silicon. This audition build is ad-hoc signed, NOT Developer ID signed or notarized. The standalone app is optional. Remove the new bundles to uninstall this preview.
+Copy `HEADJOB.component` to `~/Library/Audio/Plug-Ins/Components/`, and `HEADJOB.vst3` to `~/Library/Audio/Plug-Ins/VST3/`. Close and restart the DAW and rescan. Choose **HEADJOB**. Bundles contain arm64 and x86_64; runtime tests were on Apple Silicon. This audition build is ad-hoc signed, NOT Developer ID signed or notarized. The standalone app is optional. Remove the new bundles to uninstall this preview.
 
 ## Audition
 
@@ -26,9 +26,9 @@ Test CSV measures H2–H9 for a 997 Hz sine, after settling, over one second at 
 
 ## Signed macOS builds
 
-Every push to `refined-preview` or `main` builds a universal AU and VST3 on a GitHub Mac (`.github/workflows/macos.yml`), runs the tests, signs with Developer ID, notarizes with Apple, then installs the result and runs auval and pluginval strictness 5. Signed builds are published to the `refined-latest` release. Signing needs six repository secrets, set once by running `installer/setup_mac_signing.sh` on the Mac; without them the job still builds, ad-hoc signed. No Mac is needed after that.
+Every push to `refined-preview` or `main` builds a universal AU and VST3 on a GitHub Mac (`.github/workflows/macos.yml`), runs the tests, signs with Developer ID, notarizes with Apple, then installs the result and runs auval and pluginval strictness 5. Signed builds are published to the `latest` release. Signing needs six repository secrets, set once by running `installer/setup_mac_signing.sh` on the Mac; without them the job still builds, ad-hoc signed. No Mac is needed after that.
 
-Local fallback: for a Developer ID signed/notarized macOS installer, the binary preview ZIP includes `Create Signed Refined Installer.command`, using the existing local certificate identities and notary Keychain profile HEADJOB. It is syntax checked but was not run end to end in this agent environment. The supplied ZIP remains ad-hoc signed.
+Local fallback: for a Developer ID signed/notarized macOS installer, the binary preview ZIP includes `Create Signed Installer.command`, using the existing local certificate identities and notary Keychain profile HEADJOB. It is syntax checked but was not run end to end in this agent environment. The supplied ZIP remains ad-hoc signed.
 
 ## Resizing (0.4.1)
 

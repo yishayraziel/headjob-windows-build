@@ -1,5 +1,5 @@
 #!/bin/bash
-# Signs (Developer ID), notarizes and packages HEADJOB Refined for macOS.
+# Signs (Developer ID), notarizes and packages HEADJOB for macOS.
 # Without the signing secrets it falls back to an ad-hoc signed, un-notarized build.
 set -euo pipefail
 # surface failures as GitHub annotations (readable without the raw logs)
@@ -26,11 +26,11 @@ notarize() {   # notarize "$1" and fail with Apple's log if it isn't accepted
 
 VERSION="${VERSION:?VERSION is required}"
 RELEASE="build/HEADJOB_artefacts/Release"
-AU="$RELEASE/AU/HEADJOB Refined.component"
-VST="$RELEASE/VST3/HEADJOB Refined.vst3"
+AU="$RELEASE/AU/HEADJOB.component"
+VST="$RELEASE/VST3/HEADJOB.vst3"
 OUT="$PWD/out"
-PKG="$OUT/HEADJOB-Refined-$VERSION-macOS-Installer.pkg"
-ZIP="$OUT/HEADJOB-Refined-$VERSION-macOS-Plugins.zip"
+PKG="$OUT/HEADJOB-$VERSION-macOS-Installer.pkg"
+ZIP="$OUT/HEADJOB-$VERSION-macOS-Plugins.zip"
 TMP="${RUNNER_TEMP:-$(mktemp -d)}"
 mkdir -p "$OUT"
 
@@ -91,13 +91,13 @@ cat > "$TMP/components.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><array>
-<dict><key>RootRelativeBundlePath</key><string>Library/Audio/Plug-Ins/Components/HEADJOB Refined.component</string><key>BundleIsRelocatable</key><false/><key>BundleOverwriteAction</key><string>upgrade</string></dict>
-<dict><key>RootRelativeBundlePath</key><string>Library/Audio/Plug-Ins/VST3/HEADJOB Refined.vst3</string><key>BundleIsRelocatable</key><false/><key>BundleOverwriteAction</key><string>upgrade</string></dict>
+<dict><key>RootRelativeBundlePath</key><string>Library/Audio/Plug-Ins/Components/HEADJOB.component</string><key>BundleIsRelocatable</key><false/><key>BundleOverwriteAction</key><string>upgrade</string></dict>
+<dict><key>RootRelativeBundlePath</key><string>Library/Audio/Plug-Ins/VST3/HEADJOB.vst3</string><key>BundleIsRelocatable</key><false/><key>BundleOverwriteAction</key><string>upgrade</string></dict>
 </array></plist>
 PLIST
 pkgbuild --root "$TMP/pkgroot" --component-plist "$TMP/components.plist" \
-  --identifier audio.headjob.refined.installer --version "$VERSION" \
-  --install-location / --ownership recommended "$TMP/unsigned.pkg"
+  --identifier audio.headjob.installer --version "$VERSION" \
+  --install-location / --ownership recommended --scripts installer/mac-scripts "$TMP/unsigned.pkg"
 
 if [ $SIGNED = 1 ]; then
   productsign --sign "$INST_ID" --timestamp "$TMP/unsigned.pkg" "$PKG"
@@ -108,6 +108,6 @@ else
   cp "$TMP/unsigned.pkg" "$PKG"
 fi
 
-(cd "$OUT" && shasum -a 256 "$(basename "$PKG")" "$(basename "$ZIP")" > "HEADJOB-Refined-$VERSION-macOS-SHA256.txt")
+(cd "$OUT" && shasum -a 256 "$(basename "$PKG")" "$(basename "$ZIP")" > "HEADJOB-$VERSION-macOS-SHA256.txt")
 ls -la "$OUT"
 [ -z "${GITHUB_OUTPUT:-}" ] || echo "signed=$SIGNED" >> "$GITHUB_OUTPUT"

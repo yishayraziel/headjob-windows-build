@@ -1,0 +1,8 @@
+#!/bin/bash
+# HEADJOB replaces the preview builds named "HEADJOB Refined", so remove them from both plug-in locations.
+user=$(/usr/bin/stat -f%Su /dev/console)
+home=$(/usr/bin/dscl . -read "/Users/$user" NFSHomeDirectory 2>/dev/null | /usr/bin/awk '{print $2}')
+for base in "/Library/Audio/Plug-Ins" "${home:-/nonexistent}/Library/Audio/Plug-Ins"; do
+  /bin/rm -rf "$base/Components/HEADJOB Refined.component" "$base/VST3/HEADJOB Refined.vst3"
+done
+exit 0
