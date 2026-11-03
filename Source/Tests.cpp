@@ -38,7 +38,9 @@ int main(int argc,char** argv){
   auto triode=sine(0,twoOClock,-6,997);std::cout<<"Triode 14:00 at -6 dBFS: H2 "<<triode[3]<<"% H3 "<<triode[1]<<"%\n";
   if(triode[3]<3.5||triode[3]<4*triode[1]||triode[1]<0.1)return 27;            // Triode: strong even, not strictly even
   if(pent[1]<7||pent[0]>-1||pentNoon[1]>pent[1]/2)return 21;                 // Pentode saturated by 14:00, not before
-  if(tape[1]<1.5||tape[1]>pent[1]/2||tape[2]<0.1||tape[2]<pent[2])return 22; // Tape: odd harmonics with a real fifth, below Pentode
+  if(tape[1]<1.5||tape[1]>pent[1]/2||tape[2]<0.1)return 22;                  // Tape: odd harmonics with a real fifth, below Pentode
+  auto pentLower=sine(1,twoOClock,-12,997);if(pent[2]<0.3||pentLower[2]>pent[2]/5)return 28; // Pentode: higher odd harmonics join with level
+  auto triodeBass=sine(0,twoOClock,-6,100);std::cout<<"Triode 14:00 H2: 100 Hz "<<triodeBass[3]<<"%, 997 Hz "<<triode[3]<<"%\n";if(triodeBass[3]<1.3*triode[3])return 29; // Triode fattens the bottom
   if(tape[1]<2*tapeLower[1]||tape[0]>-0.5)return 25;                         // Tape harmonics grow with level and peaks are squashed
   auto lowLoud=sine(2,twoOClock,-6,60),lowQuiet=sine(2,twoOClock,-30,60),highLoud=sine(2,twoOClock,-6,8000),highQuiet=sine(2,twoOClock,-30,8000),midQuiet=sine(2,twoOClock,-30,300),pentLow=sine(1,twoOClock,-6,60),pentHigh=sine(1,twoOClock,-6,4000);
   const double lowSquash=lowQuiet[0]-lowLoud[0],highSquash=highQuiet[0]-highLoud[0];
@@ -47,6 +49,13 @@ int main(int argc,char** argv){
   if(midQuiet[0]<0.5||std::abs(highQuiet[0])>0.5)return 26;                  // bottom and mids fatten, quiet highs stay flat
   if(std::abs(pentLow[0]-pentHigh[0])>0.3)return 24;                         // Pentode stays flat with frequency
  }
+
+ for(std::array<float,3> a:{std::array<float,3>{2,0,0},{7.22f,0,0},{10,0,0},{0,2,0},{0,0,2},{5,5,5},{10,10,10}}){ // the process must not create overs
+  Engine e;e.prepare(48000,256);juce::AudioBuffer<double>b(2,256);double peak=0;const double amp=std::pow(10.0,-0.1/20);
+  for(int block=0;block<400;++block){for(int i=0;i<256;++i)for(int c=0;c<2;++c)b.setSample(c,i,amp*std::sin(2*juce::MathConstants<double>::pi*997*(block*256+i)/48000));e.process(b,a,false);if(block>100)for(int i=0;i<256;++i)peak=std::max(peak,std::abs(b.getSample(0,i)));}
+  if(peak>1)return 30;
+ }
+ std::cout<<"No overs from a -0.1 dBFS sine passed\n";
 
  for(double sr:{44100.,48000.,96000.,192000.}) {
   Engine e;e.prepare(sr,256);juce::AudioBuffer<double>b(2,256);double peak=0;

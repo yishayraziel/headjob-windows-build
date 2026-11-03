@@ -25,3 +25,12 @@ The 0.5.0 Tape above removed too many harmonics. The manual describes Tape as od
 ## 0.5.3 Triode, raised after listening to 0.5.2
 
 14:00, 997 Hz, H2: 0.36 to 1.29% at -18 dBFS, 0.70 to 2.54% at -12 dBFS, 1.30 to 4.76% at -6 dBFS. H3 0.33% at -6 dBFS.
+
+## 0.5.4, from the HEDD 192 manual and a secondary research summary
+
+Nothing here is measured against hardware. Hardware captures are still pending.
+
+Pentode 14:00, 997 Hz: H5 0.03% at -12 dBFS, 0.63% at -6 dBFS. H3 9.24% at -6 dBFS.
+Triode 14:00 H2 at -6 dBFS: 100 Hz 8.5%, 997 Hz 5.2%. Quiet response stays within 0.2 dB.
+Tape 14:00: +0.2 dB level at -12 dBFS with the peak behaviour unchanged.
+A soft ceiling prevents the process from creating overs from a -0.1 dBFS sine.

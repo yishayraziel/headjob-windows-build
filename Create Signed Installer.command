@@ -16,8 +16,8 @@ done
 cat > "$stage/components.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><array><dict><key>RootRelativeBundlePath</key><string>Library/Audio/Plug-Ins/Components/HEADJOB.component</string><key>BundleIsRelocatable</key><false/><key>BundleOverwriteAction</key><string>upgrade</string></dict><dict><key>RootRelativeBundlePath</key><string>Library/Audio/Plug-Ins/VST3/HEADJOB.vst3</string><key>BundleIsRelocatable</key><false/><key>BundleOverwriteAction</key><string>upgrade</string></dict></array></plist>
 PLIST
-/usr/bin/pkgbuild --root "$stage/root" --component-plist "$stage/components.plist" --identifier audio.headjob.installer --version 0.5.3 --install-location / --ownership recommended "$stage/unsigned.pkg"
-output="$PWD/HEADJOB-0.5.3-Signed-Installer-$(date +%Y%m%d-%H%M%S).pkg"
+/usr/bin/pkgbuild --root "$stage/root" --component-plist "$stage/components.plist" --identifier audio.headjob.installer --version 0.5.4 --install-location / --ownership recommended "$stage/unsigned.pkg"
+output="$PWD/HEADJOB-0.5.4-Signed-Installer-$(date +%Y%m%d-%H%M%S).pkg"
 /usr/bin/productsign --sign "$installerIdentity" --timestamp "$stage/unsigned.pkg" "$output"
 /usr/sbin/pkgutil --check-signature "$output"
 echo "Signed: $output"
