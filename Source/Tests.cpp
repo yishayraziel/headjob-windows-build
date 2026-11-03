@@ -27,20 +27,25 @@ int main(int argc,char** argv){
  }
 
 
- // Sine through one stage: fundamental gain in dB and third harmonic in percent.
- auto sine=[](int stage,float knob,double db,double hz){Engine e;e.prepare(48000,256);juce::AudioBuffer<double>b(2,256);std::array<float,3>a{};a[stage]=knob;const double amp=std::pow(10.0,db/20),w=2*juce::MathConstants<double>::pi*hz/48000;double re[4]{},im[4]{};double count=0;
-  for(int s=0;s<96000;s+=256){for(int i=0;i<256;++i)for(int c=0;c<2;++c)b.setSample(c,i,amp*std::sin(w*(s+i)));e.process(b,a,false);if(s>=48000)for(int i=0;i<256;++i){double x=b.getSample(0,i);double wn=1-std::cos(2*juce::MathConstants<double>::pi*(s+i-48000)/48000.0);count+=wn;for(int h:{1,3}){re[h]+=wn*x*std::cos(w*h*(s+i));im[h]+=wn*x*std::sin(w*h*(s+i));}}}
-  double f=std::hypot(re[1],im[1]);return std::pair<double,double>{20*std::log10(2*f/count/amp),100*std::hypot(re[3],im[3])/f};};
+ // Sine through one stage: fundamental gain in dB, then H3, H5 and H2 in percent.
+ auto sine=[](int stage,float knob,double db,double hz){Engine e;e.prepare(48000,256);juce::AudioBuffer<double>b(2,256);std::array<float,3>a{};a[stage]=knob;const double amp=std::pow(10.0,db/20),w=2*juce::MathConstants<double>::pi*hz/48000;double re[6]{},im[6]{};double count=0;
+  for(int s=0;s<96000;s+=256){for(int i=0;i<256;++i)for(int c=0;c<2;++c)b.setSample(c,i,amp*std::sin(w*(s+i)));e.process(b,a,false);if(s>=48000)for(int i=0;i<256;++i){double x=b.getSample(0,i);double wn=1-std::cos(2*juce::MathConstants<double>::pi*(s+i-48000)/48000.0);count+=wn;for(int h:{1,2,3,5}){re[h]+=wn*x*std::cos(w*h*(s+i));im[h]+=wn*x*std::sin(w*h*(s+i));}}}
+  double f=std::hypot(re[1],im[1]);return std::array<double,4>{20*std::log10(2*f/count/amp),100*std::hypot(re[3],im[3])/f,100*std::hypot(re[5],im[5])/f,100*std::hypot(re[2],im[2])/f};};
  {
   constexpr float twoOClock=7.22f;
-  auto pent=sine(1,twoOClock,-6,997),tape=sine(2,twoOClock,-6,997),pentNoon=sine(1,5,-6,997);
-  std::cout<<"14:00 at -6 dBFS: Pentode gain "<<pent.first<<" dB H3 "<<pent.second<<"%, Tape gain "<<tape.first<<" dB H3 "<<tape.second<<"%, Pentode 12:00 H3 "<<pentNoon.second<<"%\n";
-  if(pent.second<7||pent.first>-1||pentNoon.second>pent.second/2)return 21;   // saturated by 14:00, not before
-  if(tape.second>pent.second/10)return 22;                                    // Tape is not a second third-harmonic stage
-  auto tapeLow=sine(2,twoOClock,-6,60),tapeHigh=sine(2,twoOClock,-6,8000),tapeQuietHigh=sine(2,twoOClock,-30,8000),pentLow=sine(1,twoOClock,-6,60),pentHigh=sine(1,twoOClock,-6,4000);
-  std::cout<<"Tape 14:00: 60 Hz "<<tapeLow.first<<" dB, 8 kHz loud "<<tapeHigh.first<<" dB, 8 kHz quiet "<<tapeQuietHigh.first<<" dB\n";
-  if(tapeLow.first-tapeHigh.first<1||tapeQuietHigh.first-tapeHigh.first<1||tapeQuietHigh.first<0.3)return 23; // Tape depends on frequency and level
-  if(std::abs(pentLow.first-pentHigh.first)>0.3)return 24;                    // Pentode stays flat
+  auto pent=sine(1,twoOClock,-6,997),tape=sine(2,twoOClock,-6,997),tapeLower=sine(2,twoOClock,-12,997),pentNoon=sine(1,5,-6,997);
+  std::cout<<"14:00 at -6 dBFS: Pentode gain "<<pent[0]<<" dB H3 "<<pent[1]<<"% H5 "<<pent[2]<<"%, Tape gain "<<tape[0]<<" dB H3 "<<tape[1]<<"% H5 "<<tape[2]<<"%, Pentode 12:00 H3 "<<pentNoon[1]<<"%\n";
+  auto triode=sine(0,twoOClock,-6,997);std::cout<<"Triode 14:00 at -6 dBFS: H2 "<<triode[3]<<"% H3 "<<triode[1]<<"%\n";
+  if(triode[3]<3.5||triode[3]<4*triode[1]||triode[1]<0.1)return 27;            // Triode: strong even, not strictly even
+  if(pent[1]<7||pent[0]>-1||pentNoon[1]>pent[1]/2)return 21;                 // Pentode saturated by 14:00, not before
+  if(tape[1]<1.5||tape[1]>pent[1]/2||tape[2]<0.1||tape[2]<pent[2])return 22; // Tape: odd harmonics with a real fifth, below Pentode
+  if(tape[1]<2*tapeLower[1]||tape[0]>-0.5)return 25;                         // Tape harmonics grow with level and peaks are squashed
+  auto lowLoud=sine(2,twoOClock,-6,60),lowQuiet=sine(2,twoOClock,-30,60),highLoud=sine(2,twoOClock,-6,8000),highQuiet=sine(2,twoOClock,-30,8000),midQuiet=sine(2,twoOClock,-30,300),pentLow=sine(1,twoOClock,-6,60),pentHigh=sine(1,twoOClock,-6,4000);
+  const double lowSquash=lowQuiet[0]-lowLoud[0],highSquash=highQuiet[0]-highLoud[0];
+  std::cout<<"Tape 14:00 compression: 60 Hz "<<lowSquash<<" dB, 8 kHz "<<highSquash<<" dB; quiet 300 Hz "<<midQuiet[0]<<" dB, quiet 8 kHz "<<highQuiet[0]<<" dB\n";
+  if(highSquash<2||highSquash<3*lowSquash)return 23;                         // highs compress sooner than lows
+  if(midQuiet[0]<0.5||std::abs(highQuiet[0])>0.5)return 26;                  // bottom and mids fatten, quiet highs stay flat
+  if(std::abs(pentLow[0]-pentHigh[0])>0.3)return 24;                         // Pentode stays flat with frequency
  }
 
  for(double sr:{44100.,48000.,96000.,192000.}) {

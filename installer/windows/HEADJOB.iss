@@ -4,7 +4,7 @@
 [Setup]
 AppId={{83715AA5-E272-4C9F-A626-85051B62126A}
 AppName=HEADJOB
-AppVersion=0.5.2
+AppVersion=0.5.3
 AppPublisher=HEADJOB Audio
 DefaultDirName={commoncf64}\VST3
 DisableDirPage=yes
@@ -14,7 +14,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
 OutputDir=..\..\dist
-OutputBaseFilename=HEADJOB-0.5.2-Windows-x64-Setup
+OutputBaseFilename=HEADJOB-0.5.3-Windows-x64-Setup
 UninstallFilesDir={commonpf64}\HEADJOB\Uninstall
 UninstallDisplayName=HEADJOB VST3
 Compression=lzma2
