@@ -1,12 +1,12 @@
-# HEADJOB 0.5.4 — audition preview
+# HEADJOB 0.6.0 — audition preview
 
 This is an ORIGINAL tentative response to owner feedback, not a hardware-calibrated HEDD emulation. Since 0.5.2 it uses the original HEADJOB identity (`audio.headjob.plugin`, subtype HdJb) and replaces HEADJOB 0.3. The macOS installer removes the old "HEADJOB Refined" preview bundles. Both default to zero processing. No previous release file has been replaced.
 
-Triode (0.5.4): asymmetric curve with strong even and some odd harmonics, level dependent. Lows hit the curve harder and are restored after it, so the bottom fattens and loud peaks soften while quiet signals stay flat. Pentode (0.5.4): a flat, memoryless curve, mostly third harmonic with higher odd harmonics joining as level rises. At 14:00 (knob 7.22) a -6 dBFS sine reaches its flat top; past 14:00 that point keeps falling, to -12 dBFS at full. 25% dry signal is kept to preserve the transient edge. Tape (0.5.3): follows the HEDD 192 manual's description. Odd harmonics, third and fifth, that grow with level. Record emphasis before the curve and its exact inverse after it keep quiet signals flat in the highs, while highs compress sooner than lows and peaks are squashed. Bottom and midrange fatten about 1 dB at 14:00. A soft ceiling on the processed signal keeps the process from creating overs. Serial ordering, 4x oversampling, 25 ms control smoothing, stereo output metering, manual output gain and RMS Auto Gain are retained.
+Sound (0.6.0): this version returns to the 0.4.1 DSP exactly, the favourite in listening so far. Triode: shallower asymmetric curve, smaller nonlinear contribution and gentler low/middle knob travel. Pentode: predominantly odd harmonic contribution blended into the unmodified signal, retaining at least 65% of the linear component at the maximum setting. Tape: reduced record pre-emphasis, reduced saturation drive, restrained nonlinear contribution and matching de-emphasis. Serial ordering, 4x oversampling, 25 ms control smoothing, stereo output metering, manual output gain and RMS Auto Gain are retained. The experimental 0.5 engine is kept at git tag `dsp-0.5.4`.
 
 Sessions saved with HEADJOB 0.3 open in this version with the same knob positions. Sessions saved with "HEADJOB Refined" no longer find that plug-in.
 
-Important: measured behaviour does not demonstrate HEDD accuracy. The 14:00 calibration follows owner listening feedback, not a hardware capture. Pentode presence and Tape brightness require listening/reference assessment. No unmeasured circuit, hysteresis or proprietary formula is claimed.
+Important: measured behaviour does not demonstrate HEDD accuracy. Pentode presence and Tape brightness require listening/reference assessment. No unmeasured circuit, hysteresis or proprietary formula is claimed.
 
 ## Install on macOS
 

@@ -26,37 +26,6 @@ int main(int argc,char** argv){
  double h2=std::hypot(re[2],im[2]),h3=std::hypot(re[3],im[3]);std::cout<<"stage="<<stage<<" H2="<<h2<<" H3="<<h3<<"\n";if(stage==0?h2<h3:h3<h2*10)return 6;
  }
 
-
- // Sine through one stage: fundamental gain in dB, then H3, H5 and H2 in percent.
- auto sine=[](int stage,float knob,double db,double hz){Engine e;e.prepare(48000,256);juce::AudioBuffer<double>b(2,256);std::array<float,3>a{};a[stage]=knob;const double amp=std::pow(10.0,db/20),w=2*juce::MathConstants<double>::pi*hz/48000;double re[6]{},im[6]{};double count=0;
-  for(int s=0;s<96000;s+=256){for(int i=0;i<256;++i)for(int c=0;c<2;++c)b.setSample(c,i,amp*std::sin(w*(s+i)));e.process(b,a,false);if(s>=48000)for(int i=0;i<256;++i){double x=b.getSample(0,i);double wn=1-std::cos(2*juce::MathConstants<double>::pi*(s+i-48000)/48000.0);count+=wn;for(int h:{1,2,3,5}){re[h]+=wn*x*std::cos(w*h*(s+i));im[h]+=wn*x*std::sin(w*h*(s+i));}}}
-  double f=std::hypot(re[1],im[1]);return std::array<double,4>{20*std::log10(2*f/count/amp),100*std::hypot(re[3],im[3])/f,100*std::hypot(re[5],im[5])/f,100*std::hypot(re[2],im[2])/f};};
- {
-  constexpr float twoOClock=7.22f;
-  auto pent=sine(1,twoOClock,-6,997),tape=sine(2,twoOClock,-6,997),tapeLower=sine(2,twoOClock,-12,997),pentNoon=sine(1,5,-6,997);
-  std::cout<<"14:00 at -6 dBFS: Pentode gain "<<pent[0]<<" dB H3 "<<pent[1]<<"% H5 "<<pent[2]<<"%, Tape gain "<<tape[0]<<" dB H3 "<<tape[1]<<"% H5 "<<tape[2]<<"%, Pentode 12:00 H3 "<<pentNoon[1]<<"%\n";
-  auto triode=sine(0,twoOClock,-6,997);std::cout<<"Triode 14:00 at -6 dBFS: H2 "<<triode[3]<<"% H3 "<<triode[1]<<"%\n";
-  if(triode[3]<3.5||triode[3]<4*triode[1]||triode[1]<0.1)return 27;            // Triode: strong even, not strictly even
-  if(pent[1]<7||pent[0]>-1||pentNoon[1]>pent[1]/2)return 21;                 // Pentode saturated by 14:00, not before
-  if(tape[1]<1.5||tape[1]>pent[1]/2||tape[2]<0.1)return 22;                  // Tape: odd harmonics with a real fifth, below Pentode
-  auto pentLower=sine(1,twoOClock,-12,997);if(pent[2]<0.3||pentLower[2]>pent[2]/5)return 28; // Pentode: higher odd harmonics join with level
-  auto triodeBass=sine(0,twoOClock,-6,100);std::cout<<"Triode 14:00 H2: 100 Hz "<<triodeBass[3]<<"%, 997 Hz "<<triode[3]<<"%\n";if(triodeBass[3]<1.3*triode[3])return 29; // Triode fattens the bottom
-  if(tape[1]<2*tapeLower[1]||tape[0]>-0.5)return 25;                         // Tape harmonics grow with level and peaks are squashed
-  auto lowLoud=sine(2,twoOClock,-6,60),lowQuiet=sine(2,twoOClock,-30,60),highLoud=sine(2,twoOClock,-6,8000),highQuiet=sine(2,twoOClock,-30,8000),midQuiet=sine(2,twoOClock,-30,300),pentLow=sine(1,twoOClock,-6,60),pentHigh=sine(1,twoOClock,-6,4000);
-  const double lowSquash=lowQuiet[0]-lowLoud[0],highSquash=highQuiet[0]-highLoud[0];
-  std::cout<<"Tape 14:00 compression: 60 Hz "<<lowSquash<<" dB, 8 kHz "<<highSquash<<" dB; quiet 300 Hz "<<midQuiet[0]<<" dB, quiet 8 kHz "<<highQuiet[0]<<" dB\n";
-  if(highSquash<2||highSquash<3*lowSquash)return 23;                         // highs compress sooner than lows
-  if(midQuiet[0]<0.5||std::abs(highQuiet[0])>0.5)return 26;                  // bottom and mids fatten, quiet highs stay flat
-  if(std::abs(pentLow[0]-pentHigh[0])>0.3)return 24;                         // Pentode stays flat with frequency
- }
-
- for(std::array<float,3> a:{std::array<float,3>{2,0,0},{7.22f,0,0},{10,0,0},{0,2,0},{0,0,2},{5,5,5},{10,10,10}}){ // the process must not create overs
-  Engine e;e.prepare(48000,256);juce::AudioBuffer<double>b(2,256);double peak=0;const double amp=std::pow(10.0,-0.1/20);
-  for(int block=0;block<400;++block){for(int i=0;i<256;++i)for(int c=0;c<2;++c)b.setSample(c,i,amp*std::sin(2*juce::MathConstants<double>::pi*997*(block*256+i)/48000));e.process(b,a,false);if(block>100)for(int i=0;i<256;++i)peak=std::max(peak,std::abs(b.getSample(0,i)));}
-  if(peak>1)return 30;
- }
- std::cout<<"No overs from a -0.1 dBFS sine passed\n";
-
  for(double sr:{44100.,48000.,96000.,192000.}) {
   Engine e;e.prepare(sr,256);juce::AudioBuffer<double>b(2,256);double peak=0;
   for(int block=0;block<300;++block){for(int i=0;i<256;++i){double x=0.5*std::sin(2*juce::MathConstants<double>::pi*997*(block*256+i)/sr);b.setSample(0,i,x);b.setSample(1,i,-x);}e.process(b,{10,10,10},block>150);for(int c=0;c<2;++c)for(int i=0;i<256;++i){double x=b.getSample(c,i);if(!std::isfinite(x))return 1;peak=std::max(peak,std::abs(x));}}

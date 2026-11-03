@@ -9,15 +9,13 @@ public:
   os->initProcessing((size_t)block); os->reset();
   rate=sr*4; alpha=1-std::exp(-2*juce::MathConstants<double>::pi*1800/rate);
   dcR=std::exp(-2*juce::MathConstants<double>::pi*8/rate);
-  triA=1-std::exp(-2*juce::MathConstants<double>::pi*200/rate);
-  bumpA=1-std::exp(-2*juce::MathConstants<double>::pi*600/rate);bumpB=1-std::exp(-2*juce::MathConstants<double>::pi*45/rate);
   for(auto& s:amount) { s.reset(rate,0.025); s.setCurrentAndTargetValue(0); }
   powerCoeff=std::exp(-1.0/(sr*0.4)); autoCoeff=std::exp(-1.0/(sr*0.25)); inputPower=outputPower=0;autoLevel=1;
   manualGain.reset(sr,0.025);manualGain.setCurrentAndTargetValue(1);
   gainEnable.reset(sr,0.015);gainEnable.setCurrentAndTargetValue(1);
   bypass.reset(sr,0.015); bypass.setCurrentAndTargetValue(0);
   dry.setSize(2,block); const int latency=getLatency();
-  delay.assign((size_t)latency+1,{0,0}); pos=0; triLow={}; triSatPrev={}; triOut={}; low={}; satPrev={}; replay1={}; bumpHigh={}; bumpLow={}; prevX={}; prevY={};
+  delay.assign((size_t)latency+1,{0,0}); pos=0; low={}; de={}; prevX={}; prevY={};
  }
  int getLatency() const {return os ? (int)std::lround(os->getLatencyInSamples()) : 0;}
  void process(juce::AudioBuffer<double>& b, const std::array<float,3>& knobs,bool off,float outputDb=0,bool autoGain=false) {
@@ -28,49 +26,27 @@ public:
   for(size_t i=0;i<up.getNumSamples();++i) {
    // More usable low/mid travel and a restrained parallel nonlinear residual.
    const double t=std::pow(amount[0].getNextValue(),1.5);
-   const double pentKnob=amount[1].getNextValue();
-   const double p=juce::jmin(1.0,pentKnob/pentodeSaturationPoint);
-   const double pentAbove=juce::jmax(0.0,(pentKnob-pentodeSaturationPoint)/(1-pentodeSaturationPoint));
+   const double p=std::pow(amount[1].getNextValue(),1.5);
    const double a=std::pow(amount[2].getNextValue(),1.5);
    for(int c=0;c<2;++c) {
     double x=up.getSample(c,(int)i);
-    // Triode: lows hit the asymmetric curve harder and are restored after it, so the bottom fattens
-    // and loud peaks soften, while quiet signals stay flat.
-    constexpr double lowEmphasis=1.0;
-    triLow[c]+=triA*(x-triLow[c]);
     const double triDrive=0.45+0.75*t,bias=0.50;
-    const double triSat=(std::tanh(triDrive*(x+lowEmphasis*triLow[c])+bias)-std::tanh(bias))/(triDrive*(1-std::pow(std::tanh(bias),2)));
-    const double tri=(triSat-(1-triA)*triSatPrev[c]+(1-triA)*triOut[c])/(1+lowEmphasis*triA);triSatPrev[c]=triSat;triOut[c]=tri;
-    x+=0.80*t*(tri-x);
-    // Pentode: flat, memoryless, mostly third harmonic, with higher odd harmonics joining as level rises.
-    // At 14:00 a -6 dBFS sine reaches its flat top; past 14:00 that point keeps falling, to -12 dBFS at full.
-    // A little dry signal keeps the transient edge.
-    const double pentDrive=(1.50+1.50*p)*(1+pentAbove);
-    const double pentU=juce::jlimit(-1.5,1.5,pentDrive*x);
-    constexpr double pentFifth=0.02,pentThird=(1+25.3125*pentFifth)/6.75;
-    const double pentU2=pentU*pentU;
-    x+=0.75*p*p*(pentU*(1-pentThird*pentU2+pentFifth*pentU2*pentU2)/pentDrive-x);
-    // Tape: odd harmonics that grow with level. Record emphasis before the curve and its exact inverse after it
-    // keep quiet signals flat, while highs reach the curve first and compress sooner, and peaks get squashed.
-    constexpr double emphasis=1.8;
+    const double tri=(std::tanh(triDrive*x+bias)-std::tanh(bias))/(triDrive*(1-std::pow(std::tanh(bias),2)));
+    x+=0.22*t*(tri-x);
+    // The untouched component preserves transient slope and crest factor.
+    const double pentDrive=1.50+1.00*p,pentMix=p*(0.25+0.10*p);
+    x+=pentMix*(std::tanh(pentDrive*x)/pentDrive-x);
     low[c]+=alpha*(x-low[c]);
+    constexpr double emphasis=0.85;
     const double pre=x+emphasis*(x-low[c]);
-    const double tapeDrive=0.60+1.10*a;
+    const double tapeDrive=0.85+1.00*a;
     const double sat=std::tanh(tapeDrive*pre)/tapeDrive;
-    const double b=emphasis*(1-alpha),pole=1-alpha;
-    const double replay=(sat-pole*satPrev[c]+(pole+b)*replay1[c])/(1+b);satPrev[c]=sat;replay1[c]=replay;
-    x+=juce::jmin(1.0,1.3*a)*(replay-x);
-    // Bottom and midrange fatten as the process goes up.
-    bumpHigh[c]+=bumpA*(x-bumpHigh[c]);
-    bumpLow[c]+=bumpB*(bumpHigh[c]-bumpLow[c]);
-    x+=0.20*a*(bumpHigh[c]-bumpLow[c]);
+    const double out=(sat+emphasis*(1-alpha)*de[c])/(1+emphasis*(1-alpha));de[c]=out;
+    x+=a*(0.20+0.18*a)*(out-x);
     const double hp=x-prevX[c]+dcR*prevY[c];prevX[c]=x;prevY[c]=hp;
     const double active=juce::jlimit(0.0,1.0,(t+p+a)*20.0);
     // Restrained makeup replaces the previous large amount-dependent boost.
-    const double shaped=(x+active*(hp-x))*(1+0.03*t+0.05*p*p+0.06*a);
-    // Peaks fold softly into a ceiling, so the process cannot create overs.
-    const double level=std::abs(shaped);
-    up.setSample(c,(int)i,level<=0.92?shaped:std::copysign(0.92+0.07*std::tanh((level-0.92)/0.07),shaped));
+    up.setSample(c,(int)i,(x+active*(hp-x))*(1+0.03*t+0.02*p+0.02*a));
    }
   }
   auto down=juce::dsp::AudioBlock<double>(b); os->processSamplesDown(down);
@@ -98,8 +74,6 @@ private:
  double powerCoeff=0,autoCoeff=0,inputPower=0,outputPower=0,autoLevel=1;
  juce::AudioBuffer<double> dry;
  std::vector<std::array<double,2>> delay;
- size_t pos=0; double rate=192000,alpha=0,dcR=0,triA=0,bumpA=0,bumpB=0;
- // Knob 7.22 of 10 is the 14:00 position on the panel's 270 degree travel.
- static constexpr double pentodeSaturationPoint=7.22/10.0;
- std::array<double,2> triLow{},triSatPrev{},triOut{},low{},satPrev{},replay1{},bumpHigh{},bumpLow{},prevX{},prevY{};
+ size_t pos=0; double rate=192000,alpha=0,dcR=0;
+ std::array<double,2> low{},de{},prevX{},prevY{};
 };
