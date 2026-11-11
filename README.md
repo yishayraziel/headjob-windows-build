@@ -1,8 +1,8 @@
-# HEADJOB 0.6.0 — audition preview
+# HEADJOB 0.7.0 — audition preview
 
 This is an ORIGINAL tentative response to owner feedback, not a hardware-calibrated HEDD emulation. Since 0.5.2 it uses the original HEADJOB identity (`audio.headjob.plugin`, subtype HdJb) and replaces HEADJOB 0.3. The macOS installer removes the old "HEADJOB Refined" preview bundles. Both default to zero processing. No previous release file has been replaced.
 
-Sound (0.6.0): this version returns to the 0.4.1 DSP exactly, the favourite in listening so far. Triode: shallower asymmetric curve, smaller nonlinear contribution and gentler low/middle knob travel. Pentode: predominantly odd harmonic contribution blended into the unmodified signal, retaining at least 65% of the linear component at the maximum setting. Tape: reduced record pre-emphasis, reduced saturation drive, restrained nonlinear contribution and matching de-emphasis. Serial ordering, 4x oversampling, 25 ms control smoothing, stereo output metering, manual output gain and RMS Auto Gain are retained. The experimental 0.5 engine is kept at commit f3f6f86.
+Sound (0.7.0): the 0.4.1 structure, the favourite in listening, with each stage made clearly audible. Measured at 14:00 (knob 7.22) with a -12 dBFS 1 kHz sine: Triode second harmonic 1.9% (0.7% in 0.4.1), Pentode third harmonic 1.2% (0.4%), Tape third harmonic 0.85% at 1 kHz and 2.1% at 3 kHz. Tape keeps the exact 0.4.1 linear response, including its lift of quiet highs (about +1.2 dB at 6 kHz at 14:00); only its nonlinear part changed, now driven through stronger record emphasis so highs saturate and compress before lows. That separates it from Pentode, which stays flat across frequency. Serial ordering, 4x oversampling, 25 ms control smoothing, stereo output metering, manual output gain and RMS Auto Gain are unchanged. The 0.4.1 sound is at commit c13cde8 (0.6.0), the experimental 0.5 engine at commit f3f6f86.
 
 Sessions saved with HEADJOB 0.3 open in this version with the same knob positions. Sessions saved with "HEADJOB Refined" no longer find that plug-in.
 

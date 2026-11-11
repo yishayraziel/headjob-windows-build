@@ -20,7 +20,7 @@ jobs:
       - name: Upload validated Windows binaries
         uses: actions/upload-artifact@v4
         with:
-          name: HEADJOB-0.6.0-Windows-x64
+          name: HEADJOB-0.7.0-Windows-x64
           if-no-files-found: error
           path: |
             dist/*.exe

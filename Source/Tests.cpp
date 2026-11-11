@@ -26,6 +26,18 @@ int main(int argc,char** argv){
  double h2=std::hypot(re[2],im[2]),h3=std::hypot(re[3],im[3]);std::cout<<"stage="<<stage<<" H2="<<h2<<" H3="<<h3<<"\n";if(stage==0?h2<h3:h3<h2*10)return 6;
  }
 
+ {// 0.7: each stage clearly audible at 14:00, Pentode and Tape distinct, the 0.4.1 high lift kept
+  auto sine=[](int stage,float knob,double db,double hz){Engine e;e.prepare(48000,256);juce::AudioBuffer<double>b(2,256);std::array<float,3>a{};a[stage]=knob;const double amp=std::pow(10.0,db/20),w=2*juce::MathConstants<double>::pi*hz/48000;double re[4]{},im[4]{},count=0;
+   for(int s=0;s<96000;s+=256){for(int i=0;i<256;++i)for(int c=0;c<2;++c)b.setSample(c,i,amp*std::sin(w*(s+i)));e.process(b,a,false);if(s>=48000)for(int i=0;i<256;++i){double x=b.getSample(0,i),wn=1-std::cos(2*juce::MathConstants<double>::pi*(s+i-48000)/48000.0);count+=wn;for(int h:{1,2,3}){re[h]+=wn*x*std::cos(w*h*(s+i));im[h]+=wn*x*std::sin(w*h*(s+i));}}}
+   const double f=std::hypot(re[1],im[1]);return std::array<double,3>{20*std::log10(2*f/count/amp),100*std::hypot(re[2],im[2])/f,100*std::hypot(re[3],im[3])/f};};
+  constexpr float twoOClock=7.22f;
+  auto tri=sine(0,twoOClock,-12,997),pent=sine(1,twoOClock,-12,997),tape=sine(2,twoOClock,-12,997),tapeHigh=sine(2,twoOClock,-12,3000),tapeQuietHigh=sine(2,twoOClock,-30,6000),tapeLoudHigh=sine(2,twoOClock,-6,6000);
+  std::cout<<"14:00 at -12 dBFS: Triode H2 "<<tri[1]<<"%, Pentode H3 "<<pent[2]<<"%, Tape H3 1 kHz "<<tape[2]<<"% 3 kHz "<<tapeHigh[2]<<"%, Tape 6 kHz quiet "<<tapeQuietHigh[0]<<" dB loud "<<tapeLoudHigh[0]<<" dB\n";
+  if(tri[1]<1.5||pent[2]<1.0)return 21;                                   // audible at 14:00
+  if(tape[2]>0.8*pent[2]||tapeHigh[2]<1.5*tape[2])return 22;              // Tape is lighter in the mids and works the highs
+  if(tapeQuietHigh[0]<1.0||tapeQuietHigh[0]-tapeLoudHigh[0]<2.0)return 23; // high lift kept, loud highs compress
+ }
+
  for(double sr:{44100.,48000.,96000.,192000.}) {
   Engine e;e.prepare(sr,256);juce::AudioBuffer<double>b(2,256);double peak=0;
   for(int block=0;block<300;++block){for(int i=0;i<256;++i){double x=0.5*std::sin(2*juce::MathConstants<double>::pi*997*(block*256+i)/sr);b.setSample(0,i,x);b.setSample(1,i,-x);}e.process(b,{10,10,10},block>150);for(int c=0;c<2;++c)for(int i=0;i<256;++i){double x=b.getSample(c,i);if(!std::isfinite(x))return 1;peak=std::max(peak,std::abs(x));}}

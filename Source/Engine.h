@@ -15,7 +15,7 @@ public:
   gainEnable.reset(sr,0.015);gainEnable.setCurrentAndTargetValue(1);
   bypass.reset(sr,0.015); bypass.setCurrentAndTargetValue(0);
   dry.setSize(2,block); const int latency=getLatency();
-  delay.assign((size_t)latency+1,{0,0}); pos=0; low={}; de={}; prevX={}; prevY={};
+  delay.assign((size_t)latency+1,{0,0}); pos=0; low={}; de={}; deSat={}; deLin={}; prevX={}; prevY={};
  }
  int getLatency() const {return os ? (int)std::lround(os->getLatencyInSamples()) : 0;}
  void process(juce::AudioBuffer<double>& b, const std::array<float,3>& knobs,bool off,float outputDb=0,bool autoGain=false) {
@@ -32,17 +32,24 @@ public:
     double x=up.getSample(c,(int)i);
     const double triDrive=0.45+0.75*t,bias=0.50;
     const double tri=(std::tanh(triDrive*x+bias)-std::tanh(bias))/(triDrive*(1-std::pow(std::tanh(bias),2)));
-    x+=0.22*t*(tri-x);
+    x+=triodeMix*t*(tri-x);
     // The untouched component preserves transient slope and crest factor.
-    const double pentDrive=1.50+1.00*p,pentMix=p*(0.25+0.10*p);
+    const double pentDrive=1.50+1.00*p,pentMix=juce::jmin(0.9,pentodeMix*p*(0.25+0.10*p));
     x+=pentMix*(std::tanh(pentDrive*x)/pentDrive-x);
+    // Tape, linear part: exactly the 0.4.1 response, including its gentle lift of the highs.
     low[c]+=alpha*(x-low[c]);
+    const double tapeMix=a*(0.20+0.18*a),tapeDrive=0.85+1.00*a;
     constexpr double emphasis=0.85;
     const double pre=x+emphasis*(x-low[c]);
-    const double tapeDrive=0.85+1.00*a;
-    const double sat=std::tanh(tapeDrive*pre)/tapeDrive;
-    const double out=(sat+emphasis*(1-alpha)*de[c])/(1+emphasis*(1-alpha));de[c]=out;
-    x+=a*(0.20+0.18*a)*(out-x);
+    const double linear=(pre+emphasis*(1-alpha)*de[c])/(1+emphasis*(1-alpha));de[c]=linear;
+    // Tape, nonlinear part: stronger record emphasis, so highs saturate and compress before lows.
+    // Only the difference the curve makes is added, which leaves the linear response above untouched.
+    constexpr double nlEmphasis=1.8;
+    const double nlPre=x+nlEmphasis*(x-low[c]);
+    const double nlSat=std::tanh(tapeDrive*nlPre)/tapeDrive;
+    const double nlOut=(nlSat+nlEmphasis*(1-alpha)*deSat[c])/(1+nlEmphasis*(1-alpha));deSat[c]=nlOut;
+    const double nlLin=(nlPre+nlEmphasis*(1-alpha)*deLin[c])/(1+nlEmphasis*(1-alpha));deLin[c]=nlLin;
+    x+=tapeMix*(linear-x)+tapeHarmonics*tapeMix*(nlOut-nlLin);
     const double hp=x-prevX[c]+dcR*prevY[c];prevX[c]=x;prevY[c]=hp;
     const double active=juce::jlimit(0.0,1.0,(t+p+a)*20.0);
     // Restrained makeup replaces the previous large amount-dependent boost.
@@ -75,5 +82,7 @@ private:
  juce::AudioBuffer<double> dry;
  std::vector<std::array<double,2>> delay;
  size_t pos=0; double rate=192000,alpha=0,dcR=0;
- std::array<double,2> low{},de{},prevX{},prevY{};
+ std::array<double,2> low{},de{},deSat{},deLin{},prevX{},prevY{};
+ // 0.7: the 0.4.1 structure with each stage's harmonics raised.
+ static constexpr double triodeMix=0.22*2.7,pentodeMix=3.0,tapeHarmonics=1.2;
 };
