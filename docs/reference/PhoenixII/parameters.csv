@@ -1,0 +1,7 @@
+index,name,default,text_at_default,steps
+0,"Process",0,"0.00",2147483647
+1,"InputTrim",0.5,"-0.00",2147483647
+2,"OutputTrim",0.5,"-0.00",2147483647
+3,"Brightness",0.5,"Gold",3
+4,"Type",0.25,"Iridescent",5
+5,"Bypass",0,"Off",2
