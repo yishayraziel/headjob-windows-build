@@ -31,8 +31,8 @@ VST="$BUILD/HEADJOB_artefacts/Release/VST3/HEADJOB.vst3"
 lipo -info "$AU/Contents/MacOS/HEADJOB" "$VST/Contents/MacOS/HEADJOB"
 
 echo "=== Sign"
-ID=$(security find-identity -v -p codesigning | awk -F'"' '/Developer ID Application/{print $2; exit}')
-if [ -n "$ID" ]; then echo "Developer ID: $ID"; else echo "No Developer ID found, signing for this Mac only"; ID="-"; fi
+ID=$(security find-identity -v -p codesigning | awk '/Developer ID Application/{print $2; exit}')
+if [ -n "$ID" ]; then echo "Developer ID certificate: $ID"; else echo "No Developer ID found, signing for this Mac only"; ID="-"; fi
 for b in "$AU" "$VST"; do codesign --force --deep --options runtime --timestamp=none --sign "$ID" "$b" && codesign --verify --deep --strict "$b" || finish 1; done
 
 echo "=== Install (your Mac password is needed once)"
